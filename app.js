@@ -40,7 +40,24 @@ app.get('/getPosts', async (req, res) => {
 // ii) POST route: Add a new post
 app.post('/addPosts', async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content,data } = req.body;
+    if(data){
+      if(!Array.isArray(data)){
+        return res.status(400).json({ error: 'Data should be an array of posts' });
+      }
+      for(const postData of data){
+        const { title, content } = postData;
+        if(!title || !content){
+           continue
+        }
+        const newPost = new Post({ title, content });
+        await newPost.save();
+      } 
+      return res.json({ message: 'Multiple posts added successfully!' }); 
+    }
+    if(!title || !content){
+      return res.status(400).json({ error: 'Title and content are required' });
+    }
     const newPost = new Post({ title, content });
     await newPost.save(); // save() adds document to DB
     res.json({ message: 'Post added successfully!', post: newPost });
